@@ -1,0 +1,136 @@
+{
+  "input_file": "data/raw/BDFoodSent-334k.csv",
+  "raw_rows": 334119,
+  "raw_columns": [
+    "uuid",
+    "createdAt",
+    "updatedAt",
+    "text",
+    "isAnonymous",
+    "reviewerName",
+    "reviewerId",
+    "ratings_overall",
+    "labels",
+    "ratings",
+    "type",
+    "likeCount",
+    "isLiked",
+    "code",
+    "name",
+    "address",
+    "city",
+    "post_code",
+    "latitude",
+    "longitude",
+    "primary_cuisine",
+    "primary_cuisine_id",
+    "cuisines",
+    "review_number",
+    "restaurant_overall_rating",
+    "hero_image",
+    "hero_listing_image",
+    "vertical_type_ids",
+    "web_path"
+  ],
+  "text_column": "text",
+  "label_column": "labels",
+  "rating_column": "ratings_overall",
+  "task": "binary",
+  "test_size": 0.15,
+  "val_size": 0.15,
+  "min_text_length_words": 3,
+  "max_text_length_characters": 512,
+  "max_samples": null,
+  "balance_strategy": "none",
+  "random_seed": 42,
+  "label_mapping": {
+    "negative": 0,
+    "positive": 1
+  },
+  "label_stats": {
+    "label_column": "labels",
+    "rating_column": "ratings_overall",
+    "source_used": "labels",
+    "valid_labels": 334119,
+    "invalid_labels": 0,
+    "label_distribution": {
+      "negative": 161275,
+      "neutral": 39315,
+      "positive": 133529
+    },
+    "label_column_valid": 334119,
+    "rating_column_valid": 334119,
+    "disagreements_with_rating": 0,
+    "comparable_labels_with_rating": 334119
+  },
+  "filter_stats": {
+    "initial_rows": 334119,
+    "removed_empty_text": 0,
+    "removed_short_text": 60980,
+    "removed_long_text": 0,
+    "removed_missing_sentiment": 0,
+    "removed_by_task": 34172,
+    "excluded_neutral_for_binary": 34172,
+    "removed_duplicate_text_sentiment": 20052,
+    "final_rows": 218915,
+    "class_distribution": {
+      "negative": 136676,
+      "positive": 82239
+    },
+    "label_mapping": {
+      "negative": 0,
+      "positive": 1
+    }
+  },
+  "sampling_stats": {
+    "initial_rows": 218915,
+    "max_samples": null,
+    "balance_strategy": "none",
+    "rows_after_max_samples": 218915,
+    "rows_after_balancing": 218915,
+    "class_distribution_before": {
+      "negative": 136676,
+      "positive": 82239
+    },
+    "max_samples_applied": false,
+    "max_samples_stratified": false,
+    "class_distribution_after_max_samples": {
+      "negative": 136676,
+      "positive": 82239
+    },
+    "class_distribution_after_balancing": {
+      "negative": 136676,
+      "positive": 82239
+    }
+  },
+  "split_stats": {
+    "train_rows": 153240,
+    "val_rows": 32837,
+    "test_rows": 32838,
+    "train_distribution": {
+      "negative": 95673,
+      "positive": 57567
+    },
+    "val_distribution": {
+      "negative": 20501,
+      "positive": 12336
+    },
+    "test_distribution": {
+      "negative": 20502,
+      "positive": 12336
+    }
+  },
+  "final_rows_before_split": 218915,
+  "final_class_distribution": {
+    "negative": 136676,
+    "positive": 82239
+  },
+  "generated_files": {
+    "train_csv": "data/processed/train.csv",
+    "val_csv": "data/processed/val.csv",
+    "test_csv": "data/processed/test.csv",
+    "label_mapping_json": "data/processed/label_mapping.json",
+    "preprocessing_report_json": "data/processed/preprocessing_report.json",
+    "preprocessing_summary_md": "reports/preprocessing_summary.md"
+  }
+}

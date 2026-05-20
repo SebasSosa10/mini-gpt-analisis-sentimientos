@@ -1,0 +1,223 @@
+{
+  "train_file": "data/processed/train.csv",
+  "text_column": "text_clean",
+  "tokenizer_type": "regex_word_punctuation",
+  "vocab_size": 16612,
+  "max_vocab_size": 20000,
+  "min_freq": 2,
+  "lowercase": true,
+  "max_context_length": 128,
+  "special_tokens": {
+    "<PAD>": 0,
+    "<UNK>": 1,
+    "<BOS>": 2,
+    "<EOS>": 3
+  },
+  "length_stats": {
+    "num_texts": 153240,
+    "mean": 16.0216,
+    "median": 13.0,
+    "min": 5,
+    "max": 65,
+    "p25": 8.0,
+    "p75": 21.0,
+    "p90": 32.0,
+    "p95": 37.0,
+    "max_context_length": 128,
+    "texts_over_max_context": 0,
+    "percent_over_max_context": 0.0
+  },
+  "top_tokens": [
+    {
+      "token": "the",
+      "frequency": 90757
+    },
+    {
+      "token": "was",
+      "frequency": 75305
+    },
+    {
+      "token": "and",
+      "frequency": 47090
+    },
+    {
+      "token": "i",
+      "frequency": 39286
+    },
+    {
+      "token": "food",
+      "frequency": 39138
+    },
+    {
+      "token": "good",
+      "frequency": 35811
+    },
+    {
+      "token": "is",
+      "frequency": 32898
+    },
+    {
+      "token": "it",
+      "frequency": 32397
+    },
+    {
+      "token": "of",
+      "frequency": 29984
+    },
+    {
+      "token": "not",
+      "frequency": 29359
+    },
+    {
+      "token": "but",
+      "frequency": 27779
+    },
+    {
+      "token": "very",
+      "frequency": 27040
+    },
+    {
+      "token": "chicken",
+      "frequency": 25215
+    },
+    {
+      "token": "to",
+      "frequency": 21653
+    },
+    {
+      "token": "a",
+      "frequency": 21273
+    },
+    {
+      "token": "they",
+      "frequency": 18695
+    },
+    {
+      "token": "in",
+      "frequency": 17963
+    },
+    {
+      "token": "taste",
+      "frequency": 16427
+    },
+    {
+      "token": "bad",
+      "frequency": 16316
+    },
+    {
+      "token": "order",
+      "frequency": 15491
+    },
+    {
+      "token": "ordered",
+      "frequency": 15106
+    },
+    {
+      "token": "t",
+      "frequency": 14968
+    },
+    {
+      "token": "quality",
+      "frequency": 12698
+    },
+    {
+      "token": "so",
+      "frequency": 12401
+    },
+    {
+      "token": "for",
+      "frequency": 11634
+    },
+    {
+      "token": "too",
+      "frequency": 11360
+    },
+    {
+      "token": "with",
+      "frequency": 10933
+    },
+    {
+      "token": "quantity",
+      "frequency": 10887
+    },
+    {
+      "token": "this",
+      "frequency": 10490
+    },
+    {
+      "token": "rice",
+      "frequency": 10072
+    }
+  ],
+  "examples": [
+    {
+      "text": "The food was delicious",
+      "tokens": [
+        "the",
+        "food",
+        "was",
+        "delicious"
+      ],
+      "input_ids": [
+        2,
+        4,
+        8,
+        5,
+        101,
+        3
+      ],
+      "decoded": "the food was delicious"
+    },
+    {
+      "text": "the meal was disappointing",
+      "tokens": [
+        "the",
+        "meal",
+        "was",
+        "disappointing"
+      ],
+      "input_ids": [
+        2,
+        4,
+        125,
+        5,
+        158,
+        3
+      ],
+      "decoded": "the meal was disappointing"
+    },
+    {
+      "text": "very very disgusting i dont even want to rate",
+      "tokens": [
+        "very",
+        "very",
+        "disgusting",
+        "i",
+        "dont",
+        "even",
+        "want",
+        "to",
+        "rate"
+      ],
+      "input_ids": [
+        2,
+        15,
+        15,
+        160,
+        7,
+        535,
+        112,
+        329,
+        17,
+        847,
+        3
+      ],
+      "decoded": "very very disgusting i dont even want to rate"
+    }
+  ],
+  "generated_files": {
+    "tokenizer_json": "data/processed/tokenizer.json",
+    "tokenization_report_json": "data/processed/tokenization_report.json",
+    "tokenization_summary_md": "reports/tokenization_summary.md"
+  }
+}

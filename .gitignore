@@ -1,0 +1,33 @@
+# Entornos virtuales
+venv/
+.venv/
+
+# Cache de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Archivos del sistema
+.DS_Store
+
+# Datos y artefactos generados
+data/raw/*
+data/processed/*
+models/*
+reports/figures/*
+
+# Conservar marcadores de carpetas vacias
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!models/.gitkeep
+!reports/figures/.gitkeep
+
+# Notebooks
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# Archivos temporales
+*.tmp
+*.temp
+*.log
