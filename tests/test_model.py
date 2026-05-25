@@ -9,16 +9,17 @@ torch = pytest.importorskip("torch")
 from src.model import MiniGPTForSentiment
 
 
-def build_small_model() -> MiniGPTForSentiment:
+def build_small_model(pooling: str = "mean") -> MiniGPTForSentiment:
     """Crea un modelo pequeno para pruebas rapidas."""
     return MiniGPTForSentiment(
         vocab_size=100,
         max_context_length=16,
-        embed_dim=32,
-        num_heads=4,
-        num_layers=2,
+        embed_dim=36,
+        num_heads=6,
+        num_layers=3,
         num_classes=2,
         dropout=0.1,
+        pooling=pooling,
     )
 
 
@@ -45,6 +46,42 @@ def test_forward_with_labels() -> None:
 
     assert outputs["logits"].shape == (2, 2)
     assert outputs["loss"] is not None
+
+
+def test_mean_pooling() -> None:
+    """Valida que mean pooling funcione correctamente."""
+    model = build_small_model(pooling="mean")
+    input_ids = torch.randint(1, 100, (2, 16))
+    attention_mask = torch.ones(2, 16, dtype=torch.long)
+    attention_mask[1, 8:] = 0
+
+    outputs = model(input_ids=input_ids, attention_mask=attention_mask)
+    assert outputs["logits"].shape == (2, 2)
+
+
+def test_last_token_pooling() -> None:
+    """Valida que last-token pooling siga funcionando."""
+    model = build_small_model(pooling="last")
+    input_ids = torch.randint(1, 100, (2, 16))
+    attention_mask = torch.ones(2, 16, dtype=torch.long)
+
+    outputs = model(input_ids=input_ids, attention_mask=attention_mask)
+    assert outputs["logits"].shape == (2, 2)
+
+
+def test_invalid_pooling_raises_error() -> None:
+    """Valida error con pooling invalido."""
+    with pytest.raises(ValueError, match="pooling"):
+        MiniGPTForSentiment(
+            vocab_size=100,
+            max_context_length=16,
+            embed_dim=36,
+            num_heads=6,
+            num_layers=3,
+            num_classes=2,
+            dropout=0.1,
+            pooling="invalid",
+        )
 
 
 def test_count_parameters_positive() -> None:

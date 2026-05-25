@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
+import math
 import sys
 from pathlib import Path
 from typing import Any
@@ -27,7 +28,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--grad-clip", type=float, default=config.GRAD_CLIP)
     parser.add_argument("--num-workers", type=int, default=0)
     parser.add_argument("--use-class-weights", action="store_true")
+    parser.add_argument("--use-focal-loss", action="store_true")
+    parser.add_argument("--focal-gamma", type=float, default=2.0)
+    parser.add_argument("--focal-alpha", type=float, default=None)
+    parser.add_argument("--label-smoothing", type=float, default=config.LABEL_SMOOTHING)
+    parser.add_argument("--warmup-ratio", type=float, default=config.WARMUP_RATIO)
     parser.add_argument("--patience", type=int, default=config.PATIENCE)
+    parser.add_argument("--use-amp", action="store_true")
     parser.add_argument("--max-train-batches", type=int, default=None)
     parser.add_argument("--max-val-batches", type=int, default=None)
     parser.add_argument(
@@ -88,6 +95,70 @@ def compute_class_weights(train_df: pd.DataFrame, num_classes: int) -> Any:
     return torch.tensor(weights, dtype=torch.float32)
 
 
+class FocalLoss:
+    """Focal Loss para manejar desbalance de clases y ejemplos dificiles.
+
+    FL(p_t) = -alpha_t * (1 - p_t)^gamma * log(p_t)
+    """
+
+    def __init__(
+        self,
+        gamma: float = 2.0,
+        alpha: Any = None,
+        label_smoothing: float = 0.0,
+    ) -> None:
+        torch = import_torch()
+        self.gamma = gamma
+        self.label_smoothing = label_smoothing
+        if alpha is not None and not isinstance(alpha, torch.Tensor):
+            alpha = torch.tensor(alpha, dtype=torch.float32)
+        self.alpha = alpha
+
+    def __call__(self, logits: Any, targets: Any) -> Any:
+        torch = import_torch()
+        import torch.nn.functional as F
+
+        if self.label_smoothing > 0:
+            num_classes = logits.size(-1)
+            smooth = self.label_smoothing / num_classes
+            one_hot = torch.zeros_like(logits).scatter(1, targets.unsqueeze(1), 1.0)
+            one_hot = one_hot * (1.0 - self.label_smoothing) + smooth
+            log_probs = F.log_softmax(logits, dim=-1)
+            ce_loss = -(one_hot * log_probs).sum(dim=-1)
+        else:
+            ce_loss = F.cross_entropy(logits, targets, reduction="none")
+
+        probs = torch.softmax(logits, dim=-1)
+        pt = probs.gather(1, targets.unsqueeze(1)).squeeze(1)
+        focal_weight = (1.0 - pt) ** self.gamma
+
+        if self.alpha is not None:
+            alpha_t = self.alpha.to(logits.device).gather(0, targets)
+            focal_weight = alpha_t * focal_weight
+
+        return (focal_weight * ce_loss).mean()
+
+
+def create_scheduler(
+    optimizer: Any,
+    num_training_steps: int,
+    warmup_ratio: float = 0.1,
+) -> Any:
+    """Crea un cosine scheduler con warmup lineal."""
+    torch = import_torch()
+    num_warmup_steps = int(num_training_steps * warmup_ratio)
+
+    def lr_lambda(current_step: int) -> float:
+        if current_step < num_warmup_steps:
+            return float(current_step) / float(max(1, num_warmup_steps))
+        progress = float(current_step - num_warmup_steps) / float(
+            max(1, num_training_steps - num_warmup_steps)
+        )
+        return max(0.0, 0.5 * (1.0 + math.cos(math.pi * progress)))
+
+    return torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
+
+
 def train_one_epoch(
     model: Any,
     dataloader: Any,
@@ -96,10 +167,13 @@ def train_one_epoch(
     device: Any,
     grad_clip: float = 1.0,
     max_batches: int | None = None,
+    scheduler: Any = None,
+    scaler: Any = None,
 ) -> dict[str, float]:
     """Entrena una epoca y retorna perdida y accuracy promedio."""
     torch = import_torch()
     tqdm = get_tqdm()
+    use_amp = scaler is not None
 
     model.train()
     total_loss = 0.0
@@ -118,15 +192,29 @@ def train_one_epoch(
         labels = batch["labels"].to(device)
 
         optimizer.zero_grad(set_to_none=True)
-        outputs = model(input_ids=input_ids, attention_mask=attention_mask)
-        logits = outputs["logits"]
-        loss = criterion(logits, labels)
-        loss.backward()
 
-        if grad_clip is not None and grad_clip > 0:
-            torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
+        if use_amp:
+            with torch.amp.autocast(device_type=device.type):
+                outputs = model(input_ids=input_ids, attention_mask=attention_mask)
+                logits = outputs["logits"]
+                loss = criterion(logits, labels)
+            scaler.scale(loss).backward()
+            if grad_clip is not None and grad_clip > 0:
+                scaler.unscale_(optimizer)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
+            scaler.step(optimizer)
+            scaler.update()
+        else:
+            outputs = model(input_ids=input_ids, attention_mask=attention_mask)
+            logits = outputs["logits"]
+            loss = criterion(logits, labels)
+            loss.backward()
+            if grad_clip is not None and grad_clip > 0:
+                torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
+            optimizer.step()
 
-        optimizer.step()
+        if scheduler is not None:
+            scheduler.step()
 
         batch_size = labels.size(0)
         predictions = torch.argmax(logits, dim=-1)
@@ -463,12 +551,38 @@ def main() -> int:
             weight_decay=args.weight_decay,
         )
 
-        if args.use_class_weights:
-            train_df = load_processed_split("train", processed_dir=config.PROCESSED_DATA_DIR)
-            class_weights = compute_class_weights(train_df, num_classes=num_classes).to(device)
-            criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
+        train_df_for_weights = load_processed_split("train", processed_dir=config.PROCESSED_DATA_DIR)
+        class_weights = None
+        if args.use_class_weights or args.use_focal_loss:
+            class_weights = compute_class_weights(train_df_for_weights, num_classes=num_classes).to(device)
+
+        if args.use_focal_loss:
+            criterion = FocalLoss(
+                gamma=args.focal_gamma,
+                alpha=class_weights if args.focal_alpha is None else args.focal_alpha,
+                label_smoothing=args.label_smoothing,
+            )
+        elif args.use_class_weights:
+            criterion = torch.nn.CrossEntropyLoss(
+                weight=class_weights,
+                label_smoothing=args.label_smoothing,
+            )
         else:
-            criterion = torch.nn.CrossEntropyLoss()
+            criterion = torch.nn.CrossEntropyLoss(
+                label_smoothing=args.label_smoothing,
+            )
+
+        num_train_batches = limited_total_batches(dataloaders["train"], args.max_train_batches)
+        num_training_steps = num_train_batches * args.epochs
+        scheduler = create_scheduler(
+            optimizer=optimizer,
+            num_training_steps=num_training_steps,
+            warmup_ratio=args.warmup_ratio,
+        )
+
+        scaler = None
+        if args.use_amp and device.type in ("cuda", "cpu"):
+            scaler = torch.amp.GradScaler(device_type=device.type)
 
         model_config = model.get_model_config()
         best_checkpoint_path = resolve_checkpoint_path(args.checkpoint_name)
@@ -497,6 +611,8 @@ def main() -> int:
                 device=device,
                 grad_clip=args.grad_clip,
                 max_batches=args.max_train_batches,
+                scheduler=scheduler,
+                scaler=scaler,
             )
             val_metrics = validate_one_epoch(
                 model=model,

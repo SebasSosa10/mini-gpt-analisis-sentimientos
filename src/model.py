@@ -147,10 +147,13 @@ class MiniGPTForSentiment(nn.Module):
         num_classes: int,
         dropout: float,
         pad_token_id: int = 0,
+        pooling: str = "mean",
     ) -> None:
         super().__init__()
         if embed_dim % num_heads != 0:
             raise ValueError("embed_dim debe ser divisible entre num_heads.")
+        if pooling not in ("mean", "last"):
+            raise ValueError("pooling debe ser 'mean' o 'last'.")
 
         self.vocab_size = vocab_size
         self.max_context_length = max_context_length
@@ -160,6 +163,7 @@ class MiniGPTForSentiment(nn.Module):
         self.num_classes = num_classes
         self.dropout = dropout
         self.pad_token_id = pad_token_id
+        self.pooling = pooling
 
         self.token_embedding = nn.Embedding(
             vocab_size,
@@ -213,12 +217,14 @@ class MiniGPTForSentiment(nn.Module):
 
         x = self.final_layer_norm(x)
 
-        # Para clasificacion se usa el ultimo token valido de cada secuencia,
-        # evitando seleccionar padding cuando las secuencias tienen longitudes distintas.
-        valid_lengths = attention_mask.long().sum(dim=1)
-        last_indices = (valid_lengths - 1).clamp(min=0, max=seq_len - 1)
-        batch_indices = torch.arange(batch_size, device=input_ids.device)
-        pooled = x[batch_indices, last_indices]
+        if self.pooling == "mean":
+            mask_expanded = attention_mask.unsqueeze(-1).float()
+            pooled = (x * mask_expanded).sum(dim=1) / mask_expanded.sum(dim=1).clamp(min=1e-9)
+        else:
+            valid_lengths = attention_mask.long().sum(dim=1)
+            last_indices = (valid_lengths - 1).clamp(min=0, max=seq_len - 1)
+            batch_indices = torch.arange(batch_size, device=input_ids.device)
+            pooled = x[batch_indices, last_indices]
 
         logits = self.classifier(pooled)
         loss = F.cross_entropy(logits, labels) if labels is not None else None
@@ -243,6 +249,7 @@ class MiniGPTForSentiment(nn.Module):
             "num_classes": self.num_classes,
             "dropout": self.dropout,
             "pad_token_id": self.pad_token_id,
+            "pooling": self.pooling,
         }
 
 
@@ -266,6 +273,7 @@ def create_model_from_config(
         num_classes=num_classes,
         dropout=config.DROPOUT,
         pad_token_id=0,
+        pooling="mean",
     )
 
 

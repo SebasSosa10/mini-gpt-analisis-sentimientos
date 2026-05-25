@@ -1,5 +1,5 @@
 {
-  "train_file": "data/processed/train.csv",
+  "train_file": "data\\processed\\train.csv",
   "text_column": "text_clean",
   "tokenizer_type": "regex_word_punctuation",
   "vocab_size": 16612,
@@ -151,24 +151,6 @@
   ],
   "examples": [
     {
-      "text": "The food was delicious",
-      "tokens": [
-        "the",
-        "food",
-        "was",
-        "delicious"
-      ],
-      "input_ids": [
-        2,
-        4,
-        8,
-        5,
-        101,
-        3
-      ],
-      "decoded": "the food was delicious"
-    },
-    {
       "text": "the meal was disappointing",
       "tokens": [
         "the",
@@ -216,8 +198,8 @@
     }
   ],
   "generated_files": {
-    "tokenizer_json": "data/processed/tokenizer.json",
-    "tokenization_report_json": "data/processed/tokenization_report.json",
-    "tokenization_summary_md": "reports/tokenization_summary.md"
+    "tokenizer_json": "data\\processed\\tokenizer.json",
+    "tokenization_report_json": "data\\processed\\tokenization_report.json",
+    "tokenization_summary_md": "reports\\tokenization_summary.md"
   }
 }

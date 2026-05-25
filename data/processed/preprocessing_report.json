@@ -1,5 +1,5 @@
 {
-  "input_file": "data/raw/BDFoodSent-334k.csv",
+  "input_file": "data\\raw\\BDFoodSent-334k.csv",
   "raw_rows": 334119,
   "raw_columns": [
     "uuid",
@@ -126,11 +126,11 @@
     "positive": 82239
   },
   "generated_files": {
-    "train_csv": "data/processed/train.csv",
-    "val_csv": "data/processed/val.csv",
-    "test_csv": "data/processed/test.csv",
-    "label_mapping_json": "data/processed/label_mapping.json",
-    "preprocessing_report_json": "data/processed/preprocessing_report.json",
-    "preprocessing_summary_md": "reports/preprocessing_summary.md"
+    "train_csv": "data\\processed\\train.csv",
+    "val_csv": "data\\processed\\val.csv",
+    "test_csv": "data\\processed\\test.csv",
+    "label_mapping_json": "data\\processed\\label_mapping.json",
+    "preprocessing_report_json": "data\\processed\\preprocessing_report.json",
+    "preprocessing_summary_md": "reports\\preprocessing_summary.md"
   }
 }

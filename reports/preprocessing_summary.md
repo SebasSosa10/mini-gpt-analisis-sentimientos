@@ -2,7 +2,7 @@
 
 ## Archivo utilizado
 
-- Archivo: `data/raw/BDFoodSent-334k.csv`
+- Archivo: `data\raw\BDFoodSent-334k.csv`
 - Filas originales: 334119
 
 ## Columnas utilizadas
@@ -65,12 +65,12 @@
 
 ## Archivos generados
 
-- `data/processed/train.csv`
-- `data/processed/val.csv`
-- `data/processed/test.csv`
-- `data/processed/label_mapping.json`
-- `data/processed/preprocessing_report.json`
-- `reports/preprocessing_summary.md`
+- `data\processed\train.csv`
+- `data\processed\val.csv`
+- `data\processed\test.csv`
+- `data\processed\label_mapping.json`
+- `data\processed\preprocessing_report.json`
+- `reports\preprocessing_summary.md`
 
 ## Observaciones para el informe academico
 

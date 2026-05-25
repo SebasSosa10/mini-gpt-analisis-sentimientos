@@ -4,7 +4,7 @@
 
 | Parametro | Valor |
 | --- | --- |
-| epochs | 5 |
+| epochs | 1 |
 | batch_size | 32 |
 | learning_rate | 0.0003 |
 | weight_decay | 0.01 |
@@ -12,8 +12,8 @@
 | grad_clip | 1.0 |
 | use_class_weights | True |
 | patience | 3 |
-| max_train_batches | None |
-| max_val_batches | None |
+| max_train_batches | 5 |
+| max_val_batches | 5 |
 
 ## Configuracion del modelo
 
@@ -21,12 +21,13 @@
 | --- | --- |
 | vocab_size | 16612 |
 | max_context_length | 128 |
-| embed_dim | 128 |
-| num_heads | 4 |
-| num_layers | 2 |
+| embed_dim | 192 |
+| num_heads | 6 |
+| num_layers | 3 |
 | num_classes | 2 |
 | dropout | 0.1 |
 | pad_token_id | 0 |
+| pooling | mean |
 
 ## Dataset utilizado
 
@@ -38,28 +39,25 @@
 ## Metrica principal de seleccion
 
 - Metrica: `val_macro_f1`.
-- Mejor valor: 0.897870175080072.
-- Mejor epoca: 5.
+- Mejor valor: 0.638942617666022.
+- Mejor epoca: 1.
 
 ## Resultados por epoca
 
 | Epoca | Train loss | Train acc | Val loss | Val acc | Val macro F1 |
 | --- | --- | --- | --- | --- | --- |
-| 1 | 0.367039 | 0.844819 | 0.309396 | 0.875019 | 0.86911 |
-| 2 | 0.292118 | 0.884978 | 0.270826 | 0.895118 | 0.887999 |
-| 3 | 0.269013 | 0.894499 | 0.2635 | 0.897037 | 0.890826 |
-| 4 | 0.254365 | 0.901938 | 0.263375 | 0.902671 | 0.89635 |
-| 5 | 0.242688 | 0.90648 | 0.25527 | 0.904315 | 0.89787 |
+| 1 | 0.687037 | 0.525 | 0.670211 | 0.65 | 0.638943 |
 
 ## Mejor checkpoint
 
-- Mejor checkpoint: `models/mini_gpt_sentiment_best_weighted.pt`.
-- Ultimo checkpoint: `models/mini_gpt_sentiment_last_weighted.pt`.
+- Mejor checkpoint: `models\mini_gpt_v2_test.pt`.
+- Ultimo checkpoint: `models\mini_gpt_v2_test_last.pt`.
 
 ## Observaciones para el informe academico
 
 - El entrenamiento usa `train.csv` y selecciona checkpoint con `val.csv`.
 - La evaluacion final sobre `test.csv` se deja para la siguiente fase.
+- Esta corrida uso `max-train-batches` o `max-val-batches`; por tanto es una corrida reducida de prueba y no el entrenamiento final.
 
 ## Limitaciones del entrenamiento
 

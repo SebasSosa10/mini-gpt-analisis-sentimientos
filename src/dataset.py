@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import random
 from pathlib import Path
 from typing import Any
 
@@ -26,6 +27,24 @@ except ImportError:  # pragma: no cover - depende del entorno local.
     TORCH_AVAILABLE = False
 
 
+def augment_text(text: str, word_dropout: float = 0.1, word_swap_prob: float = 0.1) -> str:
+    """Aplica augmentacion simple al texto: dropout y swap de palabras."""
+    words = text.split()
+    if len(words) <= 2:
+        return text
+
+    if word_dropout > 0:
+        words = [w for w in words if random.random() > word_dropout]
+        if not words:
+            words = text.split()
+
+    if word_swap_prob > 0 and len(words) > 1 and random.random() < word_swap_prob:
+        i = random.randint(0, len(words) - 2)
+        words[i], words[i + 1] = words[i + 1], words[i]
+
+    return " ".join(words)
+
+
 class SentimentDataset(Dataset):
     """Dataset de PyTorch para textos tokenizados y etiquetas."""
 
@@ -36,6 +55,9 @@ class SentimentDataset(Dataset):
         text_column: str = "text_clean",
         label_column: str = "label_id",
         max_length: int = 128,
+        augment: bool = False,
+        word_dropout: float = 0.1,
+        word_swap_prob: float = 0.1,
     ) -> None:
         require_torch()
         missing_columns = [
@@ -54,14 +76,26 @@ class SentimentDataset(Dataset):
         self.text_column = text_column
         self.label_column = label_column
         self.max_length = max_length
+        self.augment = augment
+        self.word_dropout = word_dropout
+        self.word_swap_prob = word_swap_prob
 
     def __len__(self) -> int:
         return len(self.dataframe)
 
     def __getitem__(self, idx: int) -> dict[str, torch.Tensor]:
         row = self.dataframe.iloc[idx]
+        text = row[self.text_column]
+
+        if self.augment:
+            text = augment_text(
+                text,
+                word_dropout=self.word_dropout,
+                word_swap_prob=self.word_swap_prob,
+            )
+
         encoded = self.tokenizer.encode_plus(
-            row[self.text_column],
+            text,
             max_length=self.max_length,
             padding=True,
             truncation=True,
@@ -116,6 +150,7 @@ def create_dataloaders(
     processed_dir: str | Path | None = None,
     num_workers: int = 0,
     include_test: bool = True,
+    augment_train: bool = True,
 ) -> dict[str, DataLoader]:
     """Crea dataloaders para train, val y test."""
     require_torch()
@@ -126,6 +161,7 @@ def create_dataloaders(
         train_df,
         tokenizer=tokenizer,
         max_length=max_length,
+        augment=augment_train,
     )
     val_dataset = SentimentDataset(
         val_df,

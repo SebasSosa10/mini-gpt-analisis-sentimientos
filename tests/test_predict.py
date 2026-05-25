@@ -45,6 +45,7 @@ def test_predict_sentiment_with_tiny_model() -> None:
         num_layers=1,
         num_classes=2,
         dropout=0.1,
+        pooling="mean",
     )
 
     result = predict_sentiment(

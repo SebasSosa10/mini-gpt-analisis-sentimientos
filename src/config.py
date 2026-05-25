@@ -51,11 +51,13 @@ LEARNING_RATE = 3e-4
 WEIGHT_DECAY = 0.01
 GRAD_CLIP = 1.0
 PATIENCE = 3
+WARMUP_RATIO = 0.1
+LABEL_SMOOTHING = 0.1
 
-# Configuracion reducida del Mini-GPT.
-EMBED_DIM = 128
-NUM_HEADS = 4
-NUM_LAYERS = 2
+# Configuracion del Mini-GPT.
+EMBED_DIM = 192
+NUM_HEADS = 6
+NUM_LAYERS = 3
 DROPOUT = 0.1
 
 # Numero inicial de clases. Se ajustara si el dataset confirma una clase neutra.

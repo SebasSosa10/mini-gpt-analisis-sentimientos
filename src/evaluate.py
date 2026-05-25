@@ -96,6 +96,7 @@ def load_model_from_checkpoint(
         num_classes=int(model_config["num_classes"]),
         dropout=float(model_config["dropout"]),
         pad_token_id=int(model_config.get("pad_token_id", 0)),
+        pooling=str(model_config.get("pooling", "last")),
     )
     model.load_state_dict(checkpoint["model_state_dict"])
     model.to(device)

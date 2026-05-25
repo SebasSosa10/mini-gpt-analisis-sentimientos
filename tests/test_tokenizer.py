@@ -78,3 +78,34 @@ def test_sentiment_dataset_item_shapes() -> None:
     assert item["input_ids"].shape[0] == 8
     assert item["attention_mask"].shape[0] == 8
     assert item["labels"].shape == ()
+
+
+def test_sentiment_dataset_with_augmentation() -> None:
+    """Valida que augmentation no rompa el dataset."""
+    pytest.importorskip("torch")
+    from src.dataset import SentimentDataset
+
+    dataframe = pd.DataFrame(
+        {
+            "text_clean": ["the food was really good and tasty"] * 4,
+            "label_id": [1, 0, 1, 0],
+        }
+    )
+    tokenizer = SimpleTokenizer(max_vocab_size=50, min_freq=1).fit(
+        dataframe["text_clean"]
+    )
+    dataset = SentimentDataset(
+        dataframe, tokenizer, max_length=16, augment=True,
+    )
+    item = dataset[0]
+
+    assert item["input_ids"].shape[0] == 16
+    assert item["attention_mask"].shape[0] == 16
+
+
+def test_augment_text_preserves_short_texts() -> None:
+    """Valida que augment_text no destruya textos muy cortos."""
+    from src.dataset import augment_text
+
+    result = augment_text("ok", word_dropout=0.5, word_swap_prob=0.5)
+    assert len(result) > 0

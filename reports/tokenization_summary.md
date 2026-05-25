@@ -2,7 +2,7 @@
 
 ## Archivo de entrenamiento usado
 
-- Archivo: `data/processed/train.csv`
+- Archivo: `data\processed\train.csv`
 - El vocabulario se construyo solo con `train.csv` para evitar fuga de informacion desde validacion o prueba.
 
 ## Tipo de tokenizacion
@@ -54,7 +54,6 @@
 
 | Texto | Tokens | IDs | Decodificado |
 | --- | --- | --- | --- |
-| The food was delicious | the food was delicious | [2, 4, 8, 5, 101, 3] | the food was delicious |
 | the meal was disappointing | the meal was disappointing | [2, 4, 125, 5, 158, 3] | the meal was disappointing |
 | very very disgusting i dont even want to rate | very very disgusting i dont even want to rate | [2, 15, 15, 160, 7, 535, 112, 329, 17, 847, 3] | very very disgusting i dont even want to rate |
 

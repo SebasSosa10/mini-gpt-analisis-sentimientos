@@ -1,6 +1,6 @@
 {
   "args": {
-    "epochs": 5,
+    "epochs": 1,
     "batch_size": 32,
     "learning_rate": 0.0003,
     "weight_decay": 0.01,
@@ -8,92 +8,51 @@
     "grad_clip": 1.0,
     "num_workers": 0,
     "use_class_weights": true,
+    "use_focal_loss": false,
+    "focal_gamma": 2.0,
+    "focal_alpha": null,
+    "label_smoothing": 0.1,
+    "warmup_ratio": 0.1,
     "patience": 3,
-    "max_train_batches": null,
-    "max_val_batches": null,
-    "checkpoint_name": "mini_gpt_sentiment_best_weighted.pt",
-    "last_checkpoint_name": "mini_gpt_sentiment_last_weighted.pt"
+    "use_amp": false,
+    "max_train_batches": 5,
+    "max_val_batches": 5,
+    "checkpoint_name": "mini_gpt_v2_test.pt",
+    "last_checkpoint_name": "mini_gpt_v2_test_last.pt"
   },
   "model_config": {
     "vocab_size": 16612,
     "max_context_length": 128,
-    "embed_dim": 128,
-    "num_heads": 4,
-    "num_layers": 2,
+    "embed_dim": 192,
+    "num_heads": 6,
+    "num_layers": 3,
     "num_classes": 2,
     "dropout": 0.1,
-    "pad_token_id": 0
+    "pad_token_id": 0,
+    "pooling": "mean"
   },
   "history": [
     {
       "epoch": 1,
-      "train_loss": 0.36703880940987216,
-      "train_accuracy": 0.8448185852257896,
-      "train_batches": 4789,
-      "val_loss": 0.30939594580695373,
-      "val_accuracy": 0.8750190334074367,
-      "val_macro_f1": 0.8691099925558721,
-      "val_batches": 1027,
+      "train_loss": 0.6870370030403137,
+      "train_accuracy": 0.525,
+      "train_batches": 5,
+      "val_loss": 0.670210886001587,
+      "val_accuracy": 0.65,
+      "val_macro_f1": 0.638942617666022,
+      "val_batches": 5,
       "selection_metric_name": "val_macro_f1",
-      "selection_metric_value": 0.8691099925558721
-    },
-    {
-      "epoch": 2,
-      "train_loss": 0.2921175114326208,
-      "train_accuracy": 0.8849778125815714,
-      "train_batches": 4789,
-      "val_loss": 0.270826390724701,
-      "val_accuracy": 0.8951183116606267,
-      "val_macro_f1": 0.8879987774276289,
-      "val_batches": 1027,
-      "selection_metric_name": "val_macro_f1",
-      "selection_metric_value": 0.8879987774276289
-    },
-    {
-      "epoch": 3,
-      "train_loss": 0.2690133691277463,
-      "train_accuracy": 0.8944988253719656,
-      "train_batches": 4789,
-      "val_loss": 0.2635002459593426,
-      "val_accuracy": 0.8970368791302494,
-      "val_macro_f1": 0.8908262341728709,
-      "val_batches": 1027,
-      "selection_metric_name": "val_macro_f1",
-      "selection_metric_value": 0.8908262341728709
-    },
-    {
-      "epoch": 4,
-      "train_loss": 0.2543647756754839,
-      "train_accuracy": 0.901938136256852,
-      "train_batches": 4789,
-      "val_loss": 0.26337457044346707,
-      "val_accuracy": 0.9026707677315223,
-      "val_macro_f1": 0.896349889493928,
-      "val_batches": 1027,
-      "selection_metric_name": "val_macro_f1",
-      "selection_metric_value": 0.896349889493928
-    },
-    {
-      "epoch": 5,
-      "train_loss": 0.24268757752963316,
-      "train_accuracy": 0.9064800313234143,
-      "train_batches": 4789,
-      "val_loss": 0.2552696593788977,
-      "val_accuracy": 0.9043152541340561,
-      "val_macro_f1": 0.897870175080072,
-      "val_batches": 1027,
-      "selection_metric_name": "val_macro_f1",
-      "selection_metric_value": 0.897870175080072
+      "selection_metric_value": 0.638942617666022
     }
   ],
-  "best_epoch": 5,
+  "best_epoch": 1,
   "best_metric_name": "val_macro_f1",
-  "best_metric_value": 0.897870175080072,
-  "best_checkpoint": "models/mini_gpt_sentiment_best_weighted.pt",
-  "last_checkpoint": "models/mini_gpt_sentiment_last_weighted.pt",
+  "best_metric_value": 0.638942617666022,
+  "best_checkpoint": "models\\mini_gpt_v2_test.pt",
+  "last_checkpoint": "models\\mini_gpt_v2_test_last.pt",
   "generated_figures": {
-    "loss": "reports/figures/training_loss_curve.png",
-    "accuracy": "reports/figures/training_accuracy_curve.png",
-    "macro_f1": "reports/figures/training_f1_curve.png"
+    "loss": "reports\\figures\\training_loss_curve.png",
+    "accuracy": "reports\\figures\\training_accuracy_curve.png",
+    "macro_f1": "reports\\figures\\training_f1_curve.png"
   }
 }

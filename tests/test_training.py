@@ -8,7 +8,13 @@ import pytest
 torch = pytest.importorskip("torch")
 
 from src.model import MiniGPTForSentiment
-from src.train import compute_class_weights, save_checkpoint, train_one_epoch
+from src.train import (
+    FocalLoss,
+    compute_class_weights,
+    create_scheduler,
+    save_checkpoint,
+    train_one_epoch,
+)
 
 
 def test_compute_class_weights() -> None:
@@ -51,8 +57,8 @@ def test_save_checkpoint(tmp_path) -> None:
     assert checkpoint_path.exists()
 
 
-def test_train_one_epoch_tiny() -> None:
-    """Ejecuta un entrenamiento minimo sobre datos sinteticos."""
+def _make_tiny_dataloader():
+    """Crea un dataloader minimo para pruebas."""
     dataset = torch.utils.data.TensorDataset(
         torch.randint(0, 50, (4, 8)),
         torch.ones(4, 8, dtype=torch.long),
@@ -67,13 +73,14 @@ def test_train_one_epoch_tiny() -> None:
             "labels": torch.stack(labels),
         }
 
-    dataloader = torch.utils.data.DataLoader(
-        dataset,
-        batch_size=2,
-        shuffle=False,
-        collate_fn=collate_fn,
+    return torch.utils.data.DataLoader(
+        dataset, batch_size=2, shuffle=False, collate_fn=collate_fn,
     )
-    model = MiniGPTForSentiment(
+
+
+def _make_tiny_model():
+    """Crea un modelo minimo para pruebas."""
+    return MiniGPTForSentiment(
         vocab_size=50,
         max_context_length=8,
         embed_dim=16,
@@ -82,6 +89,12 @@ def test_train_one_epoch_tiny() -> None:
         num_classes=2,
         dropout=0.1,
     )
+
+
+def test_train_one_epoch_tiny() -> None:
+    """Ejecuta un entrenamiento minimo sobre datos sinteticos."""
+    dataloader = _make_tiny_dataloader()
+    model = _make_tiny_model()
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
     criterion = torch.nn.CrossEntropyLoss()
 
@@ -99,3 +112,64 @@ def test_train_one_epoch_tiny() -> None:
     assert "accuracy" in metrics
     assert metrics["loss"] >= 0
     assert 0 <= metrics["accuracy"] <= 1
+
+
+def test_train_with_scheduler() -> None:
+    """Valida que el scheduler se integre correctamente en el entrenamiento."""
+    dataloader = _make_tiny_dataloader()
+    model = _make_tiny_model()
+    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
+    scheduler = create_scheduler(optimizer, num_training_steps=10, warmup_ratio=0.1)
+    criterion = torch.nn.CrossEntropyLoss()
+
+    metrics = train_one_epoch(
+        model=model,
+        dataloader=dataloader,
+        optimizer=optimizer,
+        criterion=criterion,
+        device=torch.device("cpu"),
+        grad_clip=1.0,
+        max_batches=1,
+        scheduler=scheduler,
+    )
+
+    assert metrics["loss"] >= 0
+
+
+def test_focal_loss() -> None:
+    """Valida que FocalLoss produzca un loss valido."""
+    logits = torch.randn(4, 2)
+    targets = torch.tensor([0, 1, 0, 1], dtype=torch.long)
+
+    focal = FocalLoss(gamma=2.0)
+    loss = focal(logits, targets)
+
+    assert loss.item() > 0
+    assert loss.ndim == 0
+
+
+def test_focal_loss_with_label_smoothing() -> None:
+    """Valida FocalLoss con label smoothing activo."""
+    logits = torch.randn(4, 2)
+    targets = torch.tensor([0, 1, 0, 1], dtype=torch.long)
+
+    focal = FocalLoss(gamma=2.0, label_smoothing=0.1)
+    loss = focal(logits, targets)
+
+    assert loss.item() > 0
+
+
+def test_create_scheduler_warmup() -> None:
+    """Valida que el scheduler suba el lr durante warmup y luego lo reduzca."""
+    model = _make_tiny_model()
+    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
+    scheduler = create_scheduler(optimizer, num_training_steps=100, warmup_ratio=0.1)
+
+    lrs = []
+    for _ in range(100):
+        optimizer.step()
+        scheduler.step()
+        lrs.append(optimizer.param_groups[0]["lr"])
+
+    assert lrs[9] > lrs[0]
+    assert lrs[-1] < lrs[9]
