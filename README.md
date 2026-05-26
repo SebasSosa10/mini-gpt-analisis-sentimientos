@@ -35,10 +35,7 @@ El repositorio `LLMs-from-scratch` de Sebastian Raschka se usó únicamente como
 
 | Campo | Valor |
 | --- | --- |
-| Integrantes | Pablo Garcés, Alejandra Mejía, Sebastián Sosa |
-| Curso | Electiva NLP |
-| Institución | EAM |
-| Docente | Robert Erick García Rey |
+| Integrantes | Pablo Garcés Hoyos, Alejandra Mejía Patiño, Joan Sebastián Sosa Bedoya |
 
 ## Dataset
 

@@ -2,12 +2,10 @@
 
 ## Portada
 
-- Institución: EAM
-- Curso: Electiva NLP
 - Título: Mini-GPT para análisis de sentimiento en reseñas de comida
-- Integrantes: Pablo Garcés,
-               Alejandra Mejía,
-               Sebastián Sosa
+- Integrantes: Pablo Garcés Hoyos,
+               Alejandra Mejía Patiño,
+               Joan Sebastián Sosa Bedoya
 
 - Docente: Robert Erick García Rey
 
